@@ -7,7 +7,7 @@ const saveEmployee = (req, res) => {
             console.error('Error inserting data:', err);
             res.status(500).send('Error inserting data');
             return
-        }
+        } 
         res.send('Data inserted successfully with ID: ' + results.insertId);
     });
 }
