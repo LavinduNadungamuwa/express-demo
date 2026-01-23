@@ -49,4 +49,31 @@ const updateEmployee = (req, res) => {
         });
     });
 }
-module.exports = { saveEmployee, getEmployees, updateEmployee };
+
+const deleteEmployee = (req, res) => {
+    const { id } = req.params;
+    
+    // Check if the employee exists
+    connection.query('SELECT * FROM employee WHERE id = ?', [id], (err, results) => {
+        if (err) {
+            console.error('Error checking employee:', err);
+            return res.status(500).send('Error checking employee');
+        }
+        
+        // If no employee found with this ID
+        if (results.length === 0) {
+            return res.status(404).send('Employee with ID ' + id + ' does not exist in database');
+        }
+        
+        // Employee exists, proceed with delete
+        connection.query('DELETE FROM employee WHERE id = ?', [id], (err, deleteResults) => {
+            if (err) {
+                console.error('Error deleting data:', err);
+                return res.status(500).send('Error deleting data');
+            }
+            res.send('Employee with ID ' + id + ' deleted successfully');
+        });
+    });
+}
+
+module.exports = { saveEmployee, getEmployees, updateEmployee, deleteEmployee };
