@@ -24,6 +24,24 @@ const getEmployees = (req, res) => {
 }
 
 
+const getEmployeeById = (req, res) => {
+    const { id } = req.params;
+    
+    connection.query('SELECT * FROM employee WHERE id = ?', [id], (err, results) => {
+        if (err) {
+            console.error('Error fetching data:', err);
+            return res.status(500).send('Error fetching data');
+        }
+        
+        // If no employee found with this ID
+        if (results.length === 0) {
+            return res.status(404).send('Employee with ID ' + id + ' does not exist in database');
+        }
+        
+        res.json(results[0]);
+    });
+}
+
 const updateEmployee = (req, res) => {
     const { id, name, age, salary } = req.body;
     
@@ -76,4 +94,4 @@ const deleteEmployee = (req, res) => {
     });
 }
 
-module.exports = { saveEmployee, getEmployees, updateEmployee, deleteEmployee };
+module.exports = { saveEmployee, getEmployees, getEmployeeById, updateEmployee, deleteEmployee };
