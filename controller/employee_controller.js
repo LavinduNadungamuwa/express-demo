@@ -1,4 +1,36 @@
 const connection = require("../db/db_connection");
+const multer = require('multer');
+const path = require('path');
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Files will be saved in 'uploads' folder
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// File filter to accept only certain file types
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|pdf|doc|docx/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (extname && mimetype) {
+        return cb(null, true);
+    } else {
+        cb(new Error('Only images (jpeg, jpg, png) and documents (pdf, doc, docx) are allowed!'));
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max file size
+    fileFilter: fileFilter
+});
 
 const saveEmployee = (req, res) => {
     const { name, age, salary } = req.body;
@@ -94,4 +126,18 @@ const deleteEmployee = (req, res) => {
     });
 }
 
-module.exports = { saveEmployee, getEmployees, getEmployeeById, updateEmployee, deleteEmployee };
+const uploadFile = (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No file uploaded');
+    }
+    
+    res.json({
+        message: 'File uploaded successfully',
+        filename: req.file.filename,
+        originalname: req.file.originalname,
+        size: req.file.size,
+        path: req.file.path
+    });
+}
+
+module.exports = { saveEmployee, getEmployees, getEmployeeById, updateEmployee, deleteEmployee, uploadFile, upload };
