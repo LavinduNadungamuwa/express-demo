@@ -26,12 +26,27 @@ const getEmployees = (req, res) => {
 
 const updateEmployee = (req, res) => {
     const { id, name, age, salary } = req.body;
-    connection.query('UPDATE employee SET name = ?, age = ?, salary = ? WHERE id = ?', [name, age, salary, id], (err, results) => {
+    
+    // Check if the employee exists
+    connection.query('SELECT * FROM employee WHERE id = ?', [id], (err, results) => {
         if (err) {
-            console.error('Error updating data:', err);
-            return res.status(500).send('Error updating data');
+            console.error('Error checking employee:', err);
+            return res.status(500).send('Error checking employee');
         }
-        res.send('Data updated successfully');
+        
+        // If no employee found with this ID
+        if (results.length === 0) {
+            return res.status(404).send('Employee with ID ' + id + ' does not exist in database');
+        }
+        
+        // Employee exists, proceed with update
+        connection.query('UPDATE employee SET name = ?, age = ?, salary = ? WHERE id = ?', [name, age, salary, id], (err, updateResults) => {
+            if (err) {
+                console.error('Error updating data:', err);
+                return res.status(500).send('Error updating data');
+            }
+            res.send('Data updated successfully');
+        });
     });
 }
 module.exports = { saveEmployee, getEmployees, updateEmployee };

@@ -7,6 +7,6 @@ const {updateEmployee} = require('../controller/employee_controller');
 
 router.post('/save', saveEmployee);
 router.put('/update', updateEmployee);
-router.get('/all', getEmployees);
+router.get('/getall', getEmployees);
 
 module.exports = router;
